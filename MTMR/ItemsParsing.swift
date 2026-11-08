@@ -176,6 +176,7 @@ enum ItemType: Decodable {
     case pomodoro(workTime: Double, restTime: Double)
     case network(flip: Bool, units: String)
     case darkMode
+    case sidecar(deviceName: String?)
     case swipe(direction: String, fingers: Int, minOffset: Float, sourceApple: SourceProtocol?, sourceBash: SourceProtocol?)
     case upnext(from: Double, to: Double, maxToShow: Int, autoResize: Bool)
 
@@ -210,6 +211,7 @@ enum ItemType: Decodable {
         case fingers
         case minOffset
         case maxToShow
+        case deviceName
     }
 
     enum ItemTypeRaw: String, Decodable {
@@ -234,6 +236,7 @@ enum ItemType: Decodable {
         case pomodoro
         case network
         case darkMode
+        case sidecar
         case swipe
         case upnext
     }
@@ -334,6 +337,9 @@ enum ItemType: Decodable {
 
         case .darkMode:
             self = .darkMode
+
+        case .sidecar:
+            self = .sidecar(deviceName: try container.decodeIfPresent(String.self, forKey: .deviceName))
             
         case .swipe:
             let sourceApple = try container.decodeIfPresent(Source.self, forKey: .sourceApple)
