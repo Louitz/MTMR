@@ -275,6 +275,13 @@ class TouchBarController: NSObject, NSTouchBarDelegate {
     }
 
     func createItems() {
+        // Every app launch, quit and activation calls this. Creating every item again each time made the
+        // previous instances pile up wherever a widget retains itself (timers, CoreAudio listeners):
+        // after 1.5 h on an M1, 116 copies of each slider and widget were still polling. The identifiers
+        // are new on every preset reload, so reuse only spans app switches; an item hidden by matchAppId
+        // is created again when it reappears.
+        var reusable: [NSTouchBarItem.Identifier: NSTouchBarItem] = items
+        for swipeItem in swipeItems { reusable[swipeItem.identifier] = swipeItem }
         items = [:]
         swipeItems = []
 
@@ -292,7 +299,7 @@ class TouchBarController: NSObject, NSTouchBarDelegate {
             }
             
             if show {
-                let item = createItem(forIdentifier: identifier, definition: definition)
+                let item = reusable[identifier] ?? createItem(forIdentifier: identifier, definition: definition)
                 if item is SwipeItem {
                     swipeItems.append(item as! SwipeItem)
                 } else {
