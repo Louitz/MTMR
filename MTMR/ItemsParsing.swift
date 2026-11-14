@@ -178,6 +178,8 @@ enum ItemType: Decodable {
     case darkMode
     case sidecar(deviceName: String?)
     case eject(volumes: [String])
+    case bluetoothBattery(device: String)
+    case airpodsBattery(device: String)
     case swipe(direction: String, fingers: Int, minOffset: Float, sourceApple: SourceProtocol?, sourceBash: SourceProtocol?)
     case upnext(from: Double, to: Double, maxToShow: Int, autoResize: Bool)
 
@@ -214,6 +216,7 @@ enum ItemType: Decodable {
         case maxToShow
         case deviceName
         case volumes
+        case device
         case style
     }
 
@@ -241,6 +244,8 @@ enum ItemType: Decodable {
         case darkMode
         case sidecar
         case eject
+        case bluetoothBattery
+        case airpodsBattery
         case swipe
         case upnext
     }
@@ -349,6 +354,13 @@ enum ItemType: Decodable {
 
         case .eject:
             self = .eject(volumes: try container.decodeIfPresent([String].self, forKey: .volumes) ?? [])
+
+        case .bluetoothBattery:
+            // The Bluetooth address, not the name: names need not be unique (both AirPods entries are called "Pro 2").
+            self = .bluetoothBattery(device: try container.decode(String.self, forKey: .device))
+
+        case .airpodsBattery:
+            self = .airpodsBattery(device: try container.decode(String.self, forKey: .device))
             
         case .swipe:
             let sourceApple = try container.decodeIfPresent(Source.self, forKey: .sourceApple)
